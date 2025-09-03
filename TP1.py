@@ -15,7 +15,8 @@ class BarraLateralBase(tk.Frame):
 
 class BarraLateralArchivos(tk.Frame):
     """
-    Esto lo hizo la IA, no se muy bien como funciona.
+    No estoy seguro de como funciona
+    
     """
     def __init__(self, master, caja_imagen, **kwargs):
         super().__init__(master, bg="lightgray", width=250, **kwargs)
