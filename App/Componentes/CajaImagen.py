@@ -91,6 +91,8 @@ class CajaDeImagen(tk.Frame):
         self._imagen_procesada = Image.fromarray((rgb*255).astype("uint8"))
         self._render_image()  # reusa tu resize/centrado
 
+
+
     def _imagen_actual_para_render(self):
         """Devuelve la imagen que debe renderizarse (procesada si existe, si no la original)."""
         if hasattr(self, "_imagen_procesada") and self._imagen_procesada is not None:

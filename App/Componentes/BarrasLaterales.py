@@ -4,7 +4,8 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import filedialog
 import numpy as np
-
+from Herramientas.Helper_img import linea_cromatica_Y
+from Herramientas.Helper_img import *
 
 class BarraLateralBase(tk.Frame):
     """Base para las barras laterales."""
@@ -69,40 +70,9 @@ class BarraLateralArchivos(tk.Frame):
             self.caja_imagen.mostrar_imagen(path)
 
 
-    #dejo esta seccion comentada por las dudas, la de arriba abre subcarpetas
-    """def insertar_items(self, padre, ruta): 
-        #Inserta carpetas e imágenes en el Treeview
-        for elemento in os.listdir(ruta):
-            path_completo = os.path.join(ruta, elemento)
-            if os.path.isdir(path_completo):
-                id_item = self.tree.insert(padre, "end", text=elemento, open=False)
-                # Insertar contenido de forma lazy (solo carpeta)
-                self.tree.insert(id_item, "end")  # nodo vacío para que se pueda expandir
-            elif elemento.lower().endswith((".png", ".jpg", ".jpeg")):
-                self.tree.insert(padre, "end", text=elemento, values=(path_completo,))
-
-    def on_doble_click(self, event):
-        item_id = self.tree.selection()[0]
-        path = self.tree.item(item_id, "values")
-        if path:
-            # Es un archivo de imagen
-            self.caja_imagen.mostrar_imagen(path[0])
-        else:
-            # Es una carpeta, expandir/colapsar
-            if self.tree.get_children(item_id):
-                # Ya tiene hijos cargados, expandir
-                if self.tree.item(item_id, "open"):
-                    self.tree.item(item_id, open=False)
-                else:
-                    self.tree.item(item_id, open=True)
-            else:
-                # Insertar contenido
-                ruta_carpeta = os.path.join(self.ruta_raiz, self.tree.item(item_id, "text"))
-                self.insertar_items(item_id, ruta_carpeta)
-                self.tree.item(item_id, open=True)
-    """
-
 class BarraLateralImagenes(BarraLateralBase):
+
+    
     def __init__(self, master, caja_imagen, **kwargs):
         super().__init__(master, **kwargs)
         self.caja = caja_imagen
@@ -127,14 +97,86 @@ class BarraLateralImagenes(BarraLateralBase):
                                    self.caja.aplicar_yiq(1.0, 1.0))
         ).pack(pady=8)
 
-"""
-class BarraLateralImagenes(BarraLateralBase):
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
-        tk.Label(self, text="Herramientas de imágenes").pack(pady=10)
-        tk.Button(self, text="Redimensionar").pack(pady=5)
-        tk.Button(self, text="Rotar").pack(pady=5)
-"""
+
+        
+         # Crear un menú desplegable
+        tk.Label(self, text="Opciones de imagen").pack(pady=4)
+        opciones = [
+        "ninguna",
+        "Solo Red",
+        "Solo Green",
+        "Solo Blue",
+        "En Gris",
+        "línea cromática X",
+        "Línea cromática Y",
+        "Punto cromático"
+        ]
+        variable_seleccionada = tk.StringVar(self)
+        variable_seleccionada.set(opciones[0]) # Establece un valor inicial
+        menu = tk.OptionMenu(self, variable_seleccionada, *opciones, command=self.accion)
+        menu.pack(padx=10, pady=10)
+
+    def accion(self, seleccion):
+        if seleccion == "Línea cromática Y":
+            # Crear ventanita emergente
+            top = tk.Toplevel(self)
+            top.title("Elegir valor de Y")
+
+            tk.Label(top, text="Ingrese valor de Y:").pack(pady=5)
+
+            var_y = tk.IntVar(value=0)  # valor inicial
+
+            entry = tk.Entry(top, textvariable=var_y)
+            entry.pack(pady=5)
+
+            def aplicar():
+                y = var_y.get()
+                guarda_imagen = self.caja.imagen.copy()
+                arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+                arr2 = arr.copy()
+                arr2[y, :, :] = 0
+                self.caja.imagen = Image.fromarray((arr2).astype("uint8"))
+                self.caja._render_image()  
+                linea_cromatica_Y(arr, y)
+
+                self.caja.imagen = guarda_imagen
+                self.caja._render_image()
+                top.destroy()
+
+            tk.Button(top, text="Aceptar", command=aplicar).pack(pady=10)
+        
+        elif(seleccion == "Solo Green"):
+            print("green")
+            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = solo_verde(arr)
+            self.caja.imagen = Image.fromarray((arr).astype("uint8"))
+            self.caja._render_image()
+
+        elif(seleccion == "Solo Blue"):
+            print("green")
+            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = solo_azul(arr)
+            self.caja.imagen = Image.fromarray((arr).astype("uint8"))
+            self.caja._render_image()
+        
+        elif(seleccion == "Solo Red"):
+            print("green")
+            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = solo_rojo(arr)
+            self.caja.imagen = Image.fromarray((arr).astype("uint8"))
+            self.caja._render_image()
+        
+        elif(seleccion == "En Gris"):
+            print("green")
+            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = gris(arr)
+            self.caja.imagen = Image.fromarray((arr).astype("uint8"))
+            self.caja._render_image()
+
+
+
+
+
 class BarraLateralGuardado(BarraLateralBase):
 
     def __init__(self, master,imagen, **kwargs): #trae el objeto CajaImagen, es necesario
@@ -159,4 +201,3 @@ class BarraLateralConfiguracion(BarraLateralBase):
         super().__init__(master, **kwargs)
         tk.Label(self, text="Configuración").pack(pady=10)
         tk.Checkbutton(self, text="Opción 1").pack()
-        tk.Checkbutton(self, text="Opción 2").pack()
