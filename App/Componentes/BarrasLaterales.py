@@ -108,7 +108,7 @@ class BarraLateralImagenes(BarraLateralBase):
         "Solo Blue",
         "En Gris",
         "línea cromática X",
-        "Línea cromática Y",
+        "Línea cromática horizontal",
         "Punto cromático"
         ]
         variable_seleccionada = tk.StringVar(self)
@@ -117,7 +117,7 @@ class BarraLateralImagenes(BarraLateralBase):
         menu.pack(padx=10, pady=10)
 
     def accion(self, seleccion):
-        if seleccion == "Línea cromática Y":
+        if seleccion == "Línea cromática horizontal":
             # Crear ventanita emergente
             top = tk.Toplevel(self)
             top.title("Elegir valor de Y")
