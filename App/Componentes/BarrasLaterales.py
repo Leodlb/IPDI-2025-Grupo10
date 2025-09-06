@@ -4,6 +4,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import filedialog
 import numpy as np
+from Componentes.CajaImagen import CajaDeImagen
 from Herramientas.Helper_img import linea_cromatica_Y
 from Herramientas.Helper_img import *
 
@@ -73,10 +74,10 @@ class BarraLateralArchivos(tk.Frame):
 class BarraLateralImagenes(BarraLateralBase):
 
     
-    def __init__(self, master, caja_imagen, **kwargs):
+    def __init__(self, master, caja_imagen: CajaDeImagen, **kwargs):
         super().__init__(master, **kwargs)
         self.caja = caja_imagen
-
+        self.bandera_primera_modificacion = True
         tk.Label(self, text="Luminancia (a)").pack(pady=4)
         self.var_a = tk.DoubleVar(value=1.0)
         tk.Scale(self, from_=0.0, to=2.0, resolution=0.05, orient="horizontal",
@@ -113,10 +114,16 @@ class BarraLateralImagenes(BarraLateralBase):
         ]
         variable_seleccionada = tk.StringVar(self)
         variable_seleccionada.set(opciones[0]) # Establece un valor inicial
+        
         menu = tk.OptionMenu(self, variable_seleccionada, *opciones, command=self.accion)
         menu.pack(padx=10, pady=10)
 
     def accion(self, seleccion):
+        if(self.bandera_primera_modificacion):
+            self.imagen_original = self.caja.imagen.copy()
+            self.bandera_primera_modificacion = False
+        else:
+            self.caja.imagen = self.imagen_original
         if seleccion == "Línea cromática horizontal":
             # Crear ventanita emergente
             top = tk.Toplevel(self)
@@ -146,6 +153,7 @@ class BarraLateralImagenes(BarraLateralBase):
             tk.Button(top, text="Aceptar", command=aplicar).pack(pady=10)
         
         elif(seleccion == "Solo Green"):
+
             print("green")
             arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
             arr = solo_verde(arr)
