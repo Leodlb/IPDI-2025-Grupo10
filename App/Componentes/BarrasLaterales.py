@@ -4,6 +4,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import filedialog
 import numpy as np
+from Componentes.CajaImagen import CajaDeImagen
 from Herramientas.Helper_img import linea_cromatica_Y
 from Herramientas.Helper_img import *
 
@@ -73,10 +74,10 @@ class BarraLateralArchivos(tk.Frame):
 class BarraLateralImagenes(BarraLateralBase):
 
     
-    def __init__(self, master, caja_imagen, **kwargs):
+    def __init__(self, master, caja_imagen: CajaDeImagen, **kwargs):
         super().__init__(master, **kwargs)
         self.caja = caja_imagen
-
+        self.bandera_primera_modificacion = True
         tk.Label(self, text="Luminancia (a)").pack(pady=4)
         self.var_a = tk.DoubleVar(value=1.0)
         tk.Scale(self, from_=0.0, to=2.0, resolution=0.05, orient="horizontal",
@@ -108,16 +109,22 @@ class BarraLateralImagenes(BarraLateralBase):
         "Solo Blue",
         "En Gris",
         "línea cromática X",
-        "Línea cromática Y",
+        "Línea cromática horizontal",
         "Punto cromático"
         ]
         variable_seleccionada = tk.StringVar(self)
         variable_seleccionada.set(opciones[0]) # Establece un valor inicial
+        
         menu = tk.OptionMenu(self, variable_seleccionada, *opciones, command=self.accion)
         menu.pack(padx=10, pady=10)
 
     def accion(self, seleccion):
-        if seleccion == "Línea cromática Y":
+        if(self.bandera_primera_modificacion):
+            self.imagen_original = self.caja._imagen_procesada.copy()
+            self.bandera_primera_modificacion = False
+        else:
+            self.caja._imagen_procesada = self.imagen_original
+        if seleccion == "Línea cromática horizontal":
             # Crear ventanita emergente
             top = tk.Toplevel(self)
             top.title("Elegir valor de Y")
@@ -131,46 +138,47 @@ class BarraLateralImagenes(BarraLateralBase):
 
             def aplicar():
                 y = var_y.get()
-                guarda_imagen = self.caja.imagen.copy()
-                arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+                guarda_imagen = self.caja._imagen_procesada.copy()
+                arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
                 arr2 = arr.copy()
                 arr2[y, :, :] = 0
-                self.caja.imagen = Image.fromarray((arr2).astype("uint8"))
+                self.caja._imagen_procesada = Image.fromarray((arr2).astype("uint8"))
                 self.caja._render_image()  
                 linea_cromatica_Y(arr, y)
 
-                self.caja.imagen = guarda_imagen
+                self.caja._imagen_procesada = guarda_imagen
                 self.caja._render_image()
                 top.destroy()
 
             tk.Button(top, text="Aceptar", command=aplicar).pack(pady=10)
         
         elif(seleccion == "Solo Green"):
+
             print("green")
-            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
             arr = solo_verde(arr)
-            self.caja.imagen = Image.fromarray((arr).astype("uint8"))
+            self.caja._imagen_procesada = Image.fromarray((arr).astype("uint8"))
             self.caja._render_image()
 
         elif(seleccion == "Solo Blue"):
             print("green")
-            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
             arr = solo_azul(arr)
-            self.caja.imagen = Image.fromarray((arr).astype("uint8"))
+            self.caja._imagen_procesada = Image.fromarray((arr).astype("uint8"))
             self.caja._render_image()
         
         elif(seleccion == "Solo Red"):
             print("green")
-            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
             arr = solo_rojo(arr)
-            self.caja.imagen = Image.fromarray((arr).astype("uint8"))
+            self.caja._imagen_procesada = Image.fromarray((arr).astype("uint8"))
             self.caja._render_image()
         
         elif(seleccion == "En Gris"):
             print("green")
-            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
             arr = gris(arr)
-            self.caja.imagen = Image.fromarray((arr).astype("uint8"))
+            self.caja._imagen_procesada = Image.fromarray((arr).astype("uint8"))
             self.caja._render_image()
 
 

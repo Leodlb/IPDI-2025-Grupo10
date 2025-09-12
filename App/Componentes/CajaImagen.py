@@ -44,8 +44,20 @@ class CajaDeImagen(tk.Frame):
         self.update_idletasks()
         ancho_max = max(self.winfo_width(), 1)
         alto_max  = max(self.winfo_height(), 1)
+        """
         im = img.copy()
         im.thumbnail((ancho_max, alto_max))
+        self.foto = ImageTk.PhotoImage(im)
+        self.label.config(image=self.foto, anchor="center")
+        self.label.image = self.foto
+        """
+         # mantener proporción
+        w, h = img.size
+        ratio = min(ancho_max / w, alto_max / h)
+        new_size = (int(w * ratio *0.8), int(h * ratio*0.8))
+
+        im = img.resize(new_size, Image.LANCZOS)
+
         self.foto = ImageTk.PhotoImage(im)
         self.label.config(image=self.foto, anchor="center")
         self.label.image = self.foto

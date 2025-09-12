@@ -40,5 +40,36 @@ def gris(matriz_imagen: np.uint8):
     matriz_promedio = np.repeat(promedios_repetidos, matriz_imagen.shape[-1], axis=-1)
     return matriz_promedio
 
-def punto_cromatico():
-    pass
+#Cosas pa dos img
+
+def igualar_tamanio_izq_sup(im1: np.uint8, im2: np.uint8):
+    tamanio1 = np.array(im1.shape)
+    tamanio2 = np.array(im2.shape)
+    tamanio = np.where(tamanio1 < tamanio2, tamanio1, tamanio2)
+    return(im1[:tamanio[0],:tamanio[1],:tamanio[2]], im2[:tamanio[0],:tamanio[1],:tamanio[2]])
+
+def array_img_if_darker(im1: np.uint8, im2: np.uint8):
+    im1, im2 = igualar_tamanio_izq_sup(im1, im2)
+    return np.where(im1 > im2, im2, im1)
+
+def array_img_if_ligther(im1: np.uint8, im2: np.uint8):
+    im1, im2 = igualar_tamanio_izq_sup(im1, im2)
+    return np.where(im1 < im2, im2, im1)
+
+def array_img_prod(im1: np.uint8, im2: np.uint8):
+    im1, im2 = igualar_tamanio_izq_sup(im1, im2)
+    im1 = np.clip(im1/255, 0., 1.)
+    im2 = np.clip(im2/255, 0., 1.)
+
+    return np.floor((im1* im2) * 255)
+
+def array_img_abs_rest(im1: np.uint8, im2: np.uint8):
+    im1, im2 = igualar_tamanio_izq_sup(im1, im2)
+    return np.abs(im1-im2)
+
+"""
+imagen1 = Image.open("G://Escritorio//flores.jpeg")
+imagen2 = Image.open("G://Escritorio//luna2.png")
+plt.imshow(array_img_abs_rest(np.array(imagen1), np.array(imagen2)))
+plt.show()
+"""
