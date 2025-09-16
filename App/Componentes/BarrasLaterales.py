@@ -3,21 +3,23 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import filedialog
+from tkinter import messagebox
 import numpy as np
 from Componentes.CajaImagen import CajaDeImagen
 from Herramientas.Helper_img import linea_cromatica_Y
 from Herramientas.Helper_img import *
 
+
 class BarraLateralBase(tk.Frame):
     """Base para las barras laterales."""
     def __init__(self, master, **kwargs):
         super().__init__(master, bg="lightgray", width=150, **kwargs)
-        self.pack_propagate(False)  # evita que se achique al mínimo
+        self.pack_propagate(False)
+
 
 class BarraLateralArchivos(tk.Frame):
     """
-    No estoy seguro de como funciona
-    
+    Barra lateral de archivos.
     """
     def __init__(self, master, caja_imagen, **kwargs):
         super().__init__(master, bg="lightgray", width=250, **kwargs)
@@ -60,24 +62,20 @@ class BarraLateralArchivos(tk.Frame):
         path = vals[0]
 
         if os.path.isdir(path):
-            # Es una carpeta: expandirla mostrando su contenido real
-            # (limpia el hijo "dummy" si existe y evita reusar la ruta raíz)
             for child in self.tree.get_children(item_id):
                 self.tree.delete(child)
             self.insertar_items(item_id, path)
             self.tree.item(item_id, open=True)
         else:
-            # Es un archivo: abrir en el visor
             self.caja_imagen.mostrar_imagen(path)
 
 
 class BarraLateralImagenes(BarraLateralBase):
-
-    
     def __init__(self, master, caja_imagen: CajaDeImagen, **kwargs):
         super().__init__(master, **kwargs)
         self.caja = caja_imagen
         self.bandera_primera_modificacion = True
+
         tk.Label(self, text="Luminancia (a)").pack(pady=4)
         self.var_a = tk.DoubleVar(value=1.0)
         tk.Scale(self, from_=0.0, to=2.0, resolution=0.05, orient="horizontal",
@@ -92,117 +90,109 @@ class BarraLateralImagenes(BarraLateralBase):
                  command=lambda _ : self.caja.aplicar_yiq(self.var_a.get(), self.var_b.get())
         ).pack(fill="x", padx=8)
 
-        # Botón para resetear (a=1, b=1)
+        # Botón para resetear
         tk.Button(self, text="Reiniciar (a=1, b=1)",
                   command=lambda: (self.var_a.set(1.0), self.var_b.set(1.0),
                                    self.caja.aplicar_yiq(1.0, 1.0))
         ).pack(pady=8)
 
-
-        
-         # Crear un menú desplegable
+        # Crear un menú desplegable
         tk.Label(self, text="Opciones de imagen").pack(pady=4)
         opciones = [
-        "ninguna",
-        "Solo Red",
-        "Solo Green",
-        "Solo Blue",
-        "En Gris",
-        "línea cromática X",
-        "Línea cromática horizontal",
-        "Punto cromático"
+            "ninguna",
+            "Solo Red",
+            "Solo Green",
+            "Solo Blue",
+            "En Gris",
+            "Línea cromática horizontal",
+            "Punto cromático",
+            "Cuasi-operaciones"
         ]
         variable_seleccionada = tk.StringVar(self)
-        variable_seleccionada.set(opciones[0]) # Establece un valor inicial
+        variable_seleccionada.set(opciones[0]) 
         
         menu = tk.OptionMenu(self, variable_seleccionada, *opciones, command=self.accion)
         menu.pack(padx=10, pady=10)
 
     def accion(self, seleccion):
-        if(self.bandera_primera_modificacion):
-            self.imagen_original = self.caja._imagen_procesada.copy()
+        if self.bandera_primera_modificacion:
+            self.imagen_original = self.caja.imagen.copy()
             self.bandera_primera_modificacion = False
         else:
-            self.caja._imagen_procesada = self.imagen_original
-        if seleccion == "Línea cromática horizontal":
-            # Crear ventanita emergente
+            self.caja.imagen = self.imagen_original
+
+        if seleccion == "Cuasi-operaciones":
+            self.master.master.mostrar_cuasi_operacion("cuasi")
+            return
+
+        elif(seleccion == "Solo Green"):
+            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = solo_verde(arr)
+            self.caja._imagen_procesada = Image.fromarray(arr.astype("uint8"))
+            self.caja._render_image()
+
+        elif(seleccion == "Solo Blue"):
+            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = solo_azul(arr)
+            self.caja._imagen_procesada = Image.fromarray(arr.astype("uint8"))
+            self.caja._render_image()
+
+        elif(seleccion == "Solo Red"):
+            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = solo_rojo(arr)
+            self.caja._imagen_procesada = Image.fromarray(arr.astype("uint8"))
+            self.caja._render_image()
+
+        elif(seleccion == "En Gris"):
+            arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
+            arr = gris(arr)
+            self.caja._imagen_procesada = Image.fromarray(arr.astype("uint8"))
+            self.caja._render_image()
+
+        elif seleccion == "Línea cromática horizontal":
             top = tk.Toplevel(self)
             top.title("Elegir valor de Y")
 
             tk.Label(top, text="Ingrese valor de Y:").pack(pady=5)
-
-            var_y = tk.IntVar(value=0)  # valor inicial
-
+            var_y = tk.IntVar(value=0)
             entry = tk.Entry(top, textvariable=var_y)
             entry.pack(pady=5)
 
             def aplicar():
                 y = var_y.get()
-                guarda_imagen = self.caja._imagen_procesada.copy()
-                arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
+                guarda_imagen = self.caja.imagen.copy()
+                arr = np.asarray(self.caja.imagen.convert("RGB"), dtype=np.int32)
                 arr2 = arr.copy()
                 arr2[y, :, :] = 0
-                self.caja._imagen_procesada = Image.fromarray((arr2).astype("uint8"))
+                self.caja.imagen = Image.fromarray((arr2).astype("uint8"))
                 self.caja._render_image()  
                 linea_cromatica_Y(arr, y)
 
-                self.caja._imagen_procesada = guarda_imagen
+                self.caja.imagen = guarda_imagen
                 self.caja._render_image()
                 top.destroy()
 
             tk.Button(top, text="Aceptar", command=aplicar).pack(pady=10)
-        
-        elif(seleccion == "Solo Green"):
-
-            print("green")
-            arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
-            arr = solo_verde(arr)
-            self.caja._imagen_procesada = Image.fromarray((arr).astype("uint8"))
-            self.caja._render_image()
-
-        elif(seleccion == "Solo Blue"):
-            print("green")
-            arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
-            arr = solo_azul(arr)
-            self.caja._imagen_procesada = Image.fromarray((arr).astype("uint8"))
-            self.caja._render_image()
-        
-        elif(seleccion == "Solo Red"):
-            print("green")
-            arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
-            arr = solo_rojo(arr)
-            self.caja._imagen_procesada = Image.fromarray((arr).astype("uint8"))
-            self.caja._render_image()
-        
-        elif(seleccion == "En Gris"):
-            print("green")
-            arr = np.asarray(self.caja._imagen_procesada.convert("RGB"), dtype=np.int32)
-            arr = gris(arr)
-            self.caja._imagen_procesada = Image.fromarray((arr).astype("uint8"))
-            self.caja._render_image()
-
-
-
 
 
 class BarraLateralGuardado(BarraLateralBase):
 
-    def __init__(self, master,imagen, **kwargs): #trae el objeto CajaImagen, es necesario
+    def __init__(self, master,imagen, **kwargs):
         super().__init__(master, **kwargs)
         tk.Label(self, text="Opciones de Guardado").pack(pady=10)
         tk.Button(self, text="Guardar", command=lambda: self.guardar(getattr(imagen, "_imagen_procesada", None) or imagen.imagen)).pack(pady=5)
 
     def guardar(self, img):
-        if img is None: #agregado para evitar errores
+        if img is None:
             tk.messagebox.showwarning("Atención", "No hay imagen para guardar.")
             return
-        # Copiado de internet, funciona
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png",
             filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("Todos los archivos", "*.*")]
         )
         if file_path: 
             img.save(file_path)
+
 
 class BarraLateralConfiguracion(BarraLateralBase):
     def __init__(self, master, **kwargs):

@@ -40,36 +40,104 @@ def gris(matriz_imagen: np.uint8):
     matriz_promedio = np.repeat(promedios_repetidos, matriz_imagen.shape[-1], axis=-1)
     return matriz_promedio
 
-#Cosas pa dos img
+def punto_cromatico():
+    pass
 
-def igualar_tamanio_izq_sup(im1: np.uint8, im2: np.uint8):
-    tamanio1 = np.array(im1.shape)
-    tamanio2 = np.array(im2.shape)
-    tamanio = np.where(tamanio1 < tamanio2, tamanio1, tamanio2)
-    return(im1[:tamanio[0],:tamanio[1],:tamanio[2]], im2[:tamanio[0],:tamanio[1],:tamanio[2]])
+def cuasi_suma_rgb_clampeada(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    resultado = imgA.astype(np.int32) + imgB.astype(np.int32)
+    resultado = np.clip(resultado, 0, 255)
+    return resultado.astype(np.uint8)
 
-def array_img_if_darker(im1: np.uint8, im2: np.uint8):
-    im1, im2 = igualar_tamanio_izq_sup(im1, im2)
-    return np.where(im1 > im2, im2, im1)
+def cuasi_suma_rgb_promediada(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    resultado = (imgA.astype(np.int32) + imgB.astype(np.int32)) // 2
+    return resultado.astype(np.uint8)
 
-def array_img_if_ligther(im1: np.uint8, im2: np.uint8):
-    im1, im2 = igualar_tamanio_izq_sup(im1, im2)
-    return np.where(im1 < im2, im2, im1)
+def cuasi_resta_rgb_clampeada(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    resultado = imgA.astype(np.int32) - imgB.astype(np.int32)
+    resultado = np.clip(resultado, 0, 255)
+    return resultado.astype(np.uint8)
 
-def array_img_prod(im1: np.uint8, im2: np.uint8):
-    im1, im2 = igualar_tamanio_izq_sup(im1, im2)
-    im1 = np.clip(im1/255, 0., 1.)
-    im2 = np.clip(im2/255, 0., 1.)
+def cuasi_resta_rgb_promediada(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    resultado = (imgA.astype(np.int32) - imgB.astype(np.int32)) // 2
+    resultado = np.clip(resultado, 0, 255)
+    return resultado.astype(np.uint8)
 
-    return np.floor((im1* im2) * 255)
+# Conversión RGB <-> YIQ
+def rgb_to_yiq(img: np.ndarray) -> np.ndarray:
+    M = np.array([
+        [0.299000,  0.587000,  0.114000],      # Y
+        [0.595716, -0.274453, -0.321263],      # I
+        [0.211456, -0.522591,  0.311135],      # Q
+    ], dtype=np.float32)
+    H, W, _ = img.shape
+    arr = img.astype(np.float32) / 255.0
+    yiq = arr.reshape(-1,3) @ M.T
+    return yiq.reshape(H, W, 3)
 
-def array_img_abs_rest(im1: np.uint8, im2: np.uint8):
-    im1, im2 = igualar_tamanio_izq_sup(im1, im2)
-    return np.abs(im1-im2)
+def yiq_to_rgb(yiq: np.ndarray) -> np.ndarray:
+    M_inv = np.array([
+        [1.000000,  0.956300,  0.621000],
+        [1.000000, -0.272100, -0.647400],
+        [1.000000, -1.106000,  1.703000],
+    ], dtype=np.float32)
+    H, W, _ = yiq.shape
+    rgb = yiq.reshape(-1,3) @ M_inv.T
+    rgb = rgb.reshape(H,W,3)
+    rgb = np.clip(rgb, 0.0, 1.0)
+    return (rgb * 255).astype(np.uint8)
 
-"""
-imagen1 = Image.open("G://Escritorio//flores.jpeg")
-imagen2 = Image.open("G://Escritorio//luna2.png")
-plt.imshow(array_img_abs_rest(np.array(imagen1), np.array(imagen2)))
-plt.show()
-"""
+# -------------------------------
+# Cuasi-operaciones en YIQ
+# -------------------------------
+
+def cuasi_suma_yiq_clampeada(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    yiqA = rgb_to_yiq(imgA)
+    yiqB = rgb_to_yiq(imgB)
+    resultado = yiqA + yiqB
+    # Clampeo en los rangos típicos de YIQ
+    Y = np.clip(resultado[:,:,0], 0.0, 1.0)
+    I = np.clip(resultado[:,:,1], -0.5957, 0.5957)
+    Q = np.clip(resultado[:,:,2], -0.5226, 0.5226)
+    return yiq_to_rgb(np.stack([Y,I,Q], axis=2))
+
+def cuasi_suma_yiq_promediada(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    yiqA = rgb_to_yiq(imgA)
+    yiqB = rgb_to_yiq(imgB)
+    resultado = (yiqA + yiqB) / 2
+    return yiq_to_rgb(resultado)
+
+def cuasi_resta_yiq_clampeada(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    yiqA = rgb_to_yiq(imgA)
+    yiqB = rgb_to_yiq(imgB)
+    resultado = yiqA - yiqB
+    # Clampeo
+    Y = np.clip(resultado[:,:,0], 0.0, 1.0)
+    I = np.clip(resultado[:,:,1], -0.5957, 0.5957)
+    Q = np.clip(resultado[:,:,2], -0.5226, 0.5226)
+    return yiq_to_rgb(np.stack([Y,I,Q], axis=2))
+
+def cuasi_resta_yiq_promediada(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    yiqA = rgb_to_yiq(imgA)
+    yiqB = rgb_to_yiq(imgB)
+    resultado = (yiqA - yiqB) / 2
+    return yiq_to_rgb(resultado)
+
+def producto_rgb(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    # Convertir a float para evitar overflow
+    resultado = (imgA.astype(np.float32) * imgB.astype(np.float32)) / 255.0
+    return np.clip(resultado, 0, 255).astype(np.uint8)
+
+def cociente_rgb(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    imgB_safe = imgB.astype(np.float32) + 1.0   # evitar división por cero
+    resultado = (imgA.astype(np.float32) / imgB_safe) * 255.0
+    return np.clip(resultado, 0, 255).astype(np.uint8)
+
+def resta_absoluta_rgb(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    resultado = np.abs(imgA.astype(np.int32) - imgB.astype(np.int32))
+    return np.clip(resultado, 0, 255).astype(np.uint8)
+
+def if_darker(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    return np.minimum(imgA, imgB).astype(np.uint8)
+
+def if_lighter(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
+    return np.maximum(imgA, imgB).astype(np.uint8)
