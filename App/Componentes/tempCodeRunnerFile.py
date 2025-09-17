@@ -1,0 +1,1 @@
+self.caja_imagen.pack(side="right", fill="both", expand=True)

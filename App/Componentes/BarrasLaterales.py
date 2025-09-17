@@ -8,6 +8,8 @@ import numpy as np
 from Componentes.CajaImagen import CajaDeImagen
 from Herramientas.Helper_img import linea_cromatica_Y
 from Herramientas.Helper_img import *
+from Componentes.PanelDeEdicionAritmeticaDePixeles import PanelDeEdicionArimeticaDePixeles as Apixeles
+
 
 
 class BarraLateralBase(tk.Frame):
@@ -17,11 +19,18 @@ class BarraLateralBase(tk.Frame):
         self.pack_propagate(False)
 
 
+class BarrasLaterales(BarraLateralBase):
+    def __init__(self, master, caja_imagen: CajaDeImagen, **kwargs):
+        super().__init__(master, **kwargs)
+    
+    
+
+
 class BarraLateralArchivos(tk.Frame):
     """
     Barra lateral de archivos.
     """
-    def __init__(self, master, caja_imagen, **kwargs):
+    def __init__(self, master, caja_imagen : CajaDeImagen, **kwargs):
         super().__init__(master, bg="lightgray", width=250, **kwargs)
         self.caja_imagen = caja_imagen
         self.pack_propagate(False)
@@ -71,8 +80,9 @@ class BarraLateralArchivos(tk.Frame):
 
 
 class BarraLateralImagenes(BarraLateralBase):
-    def __init__(self, master, caja_imagen: CajaDeImagen, **kwargs):
+    def __init__(self, master, main_area, caja_imagen: CajaDeImagen, **kwargs):
         super().__init__(master, **kwargs)
+        self.main_area = main_area
         self.caja = caja_imagen
         self.bandera_primera_modificacion = True
 
@@ -122,7 +132,9 @@ class BarraLateralImagenes(BarraLateralBase):
             self.caja.imagen = self.imagen_original
 
         if seleccion == "Cuasi-operaciones":
-            self.master.master.mostrar_cuasi_operacion("cuasi")
+            self.caja.forget()
+            Ap = Apixeles(self.main_area, self.caja)
+            Ap.pack(expand=True, fill="both")
             return
 
         elif(seleccion == "Solo Green"):

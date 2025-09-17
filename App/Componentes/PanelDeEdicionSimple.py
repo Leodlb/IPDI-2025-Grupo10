@@ -6,29 +6,16 @@ from tkinter import filedialog
 import numpy as np
 
 
-class CajaDeImagen(tk.Frame):
-    """
-    Con esta clase se interactuara con la imagen, contiene la imagen
-    Deberia agregar los metodos para modificar las imagenes aca
-    Seria mas recomendable hacer eso en otra clase, principio de responsabilidad
-    pero como quedaria muy vacia, se usa preferentemente esta.
-    
+class PanelDeEdicionSimple(tk.Frame):
+
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.label = tk.Label(self, bg="white")
         self.label.pack(expand=True, fill="both")
 
-        self.imagen = None   # original PIL.Image
-        self.foto = None     # PhotoImage actual
-
-        # Vincular evento de cambio de tamaño
-        self.bind("<Configure>", self._on_resize)
-    """
-    def __init__(self, master, **kwargs):
-        super().__init__(master, **kwargs)
-        self.label = tk.Label(self, bg="white")
-        self.label.pack(expand=True, fill="both")
-        self.imagen = None  
+        self.imgA = None   # primera imagen
+        self.imgB = None   # segunda imagen
+        self.imagen = None  #  inicializamos acá
         self._imagen_procesada = None
         self.foto = None
 
@@ -36,10 +23,35 @@ class CajaDeImagen(tk.Frame):
 
     def mostrar_imagen(self, ruta_imagen=None):
         if ruta_imagen:
-            self.imagen = Image.open(ruta_imagen).convert("RGB")
-            self._imagen_procesada = None  # borrar cualquier procesamiento previo
-            self._render_image()
+            nueva = Image.open(ruta_imagen).convert("RGB")
 
+            if self.imgA is None:
+                # primera imagen
+                self.imgA = nueva
+                self.imagen = self.imgA
+            elif self.imgB is None:
+                # segunda imagen, se guarda pero NO se muestra
+                self.imgB = nueva
+                # seguimos mostrando la A
+                self.imagen = self.imgA
+            else:
+                # si ya hay 2 imágenes cargadas, reemplazamos la B
+                self.imgB = nueva
+                self.imagen = self.imgA
+
+            self._imagen_procesada = None  
+
+        if not hasattr(self, "imagen") or self.imagen is None:
+            return
+        self._render_image()
+
+    def obtener_arrays(self):
+        """Devuelve imgA y imgB como arrays numpy, si existen."""
+        if self.imgA is None or self.imgB is None:
+            return None, None
+        arrA = np.asarray(self.imgA, dtype=np.uint8)
+        arrB = np.asarray(self.imgB, dtype=np.uint8)
+        return arrA, arrB
 
     def _on_resize(self, event):
         if self.imagen:
@@ -52,7 +64,13 @@ class CajaDeImagen(tk.Frame):
         self.update_idletasks()
         ancho_max = max(self.winfo_width(), 1)
         alto_max  = max(self.winfo_height(), 1)
-
+        """
+        im = img.copy()
+        im.thumbnail((ancho_max, alto_max))
+        self.foto = ImageTk.PhotoImage(im)
+        self.label.config(image=self.foto, anchor="center")
+        self.label.image = self.foto
+        """
          # mantener proporción
         w, h = img.size
         ratio = min(ancho_max / w, alto_max / h)
