@@ -124,7 +124,7 @@ class BarraLateralImagenes(BarraLateralBase):
         menu = tk.OptionMenu(self, variable_seleccionada, *opciones, command=self.accion)
         menu.pack(padx=10, pady=10)
 
-        tk.Button(self, text="Histograma de Luminancia",
+        tk.Button(self, text="Filtros luminancia",
                   command= self.pdefdf
         ).pack(pady=8)
 

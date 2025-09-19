@@ -5,7 +5,7 @@ import numpy as np
 from Herramientas.Helper_img import * 
 from Componentes.PanelDeEdicionSimple import * 
 from Componentes.CajaImagen import *
-
+import matplotlib.pyplot as plt
 
 class PanelDeEdicionFiltrosDeFunciones(tk.Frame):
 
@@ -27,7 +27,7 @@ class PanelDeEdicionFiltrosDeFunciones(tk.Frame):
         opciones = tk.OptionMenu(self, self.var_cuasi, *modos)
         opciones.grid(row=1, column=0, columnspan=1, pady=5, sticky="ew")
 
-
+        tk.Button(self, text="Mostrar histograma", command=self.mostrar_histograma).grid(row=0, column=1, pady=5)
 
         # --- Tres labels para A, B y Resultado ---
         self.labelA = tk.Label(self, bg="lightgray", text="Imagen A", width=40, height=15)
@@ -53,6 +53,22 @@ class PanelDeEdicionFiltrosDeFunciones(tk.Frame):
             self.grid_columnconfigure(c, weight=1)
             # Permitimos que la fila de las imágenes crezca cuando redimensionamos
             self.grid_rowconfigure(2, weight=1)
+
+    def mostrar_histograma(self):
+        """Combina imgA e imgB según var_cuasi"""
+        if self.imgA is None:
+            messagebox.showwarning("Atención", "Debes cargar las dos imágenes.")
+            return
+
+        # Redimensionar imgA
+        arrA = np.asarray(self.imgA.copy(), dtype=np.uint8)
+        plt.hist(rgb_to_yiq(arrA)[...,0].ravel(), bins=10, edgecolor='black')
+        plt.xlabel('Valor')
+        plt.ylabel('Frecuencia')
+        plt.title('Histograma de A')
+        plt.show()
+        return
+
 
     def aplicar_filtro(self):
         """Combina imgA e imgB según var_cuasi"""
