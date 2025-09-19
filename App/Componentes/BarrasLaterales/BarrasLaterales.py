@@ -9,7 +9,7 @@ from Componentes.CajaImagen import CajaDeImagen
 from Herramientas.Helper_img import linea_cromatica_Y
 from Herramientas.Helper_img import *
 from Componentes.PanelDeEdicionAritmeticaDePixeles import PanelDeEdicionArimeticaDePixeles as Apixeles
-from Componentes.PanelDeEdicionFiltrosDeFunciones import *
+
 
 
 class BarraLateralBase(tk.Frame):
@@ -17,13 +17,6 @@ class BarraLateralBase(tk.Frame):
     def __init__(self, master, **kwargs):
         super().__init__(master, bg="lightgray", width=150, **kwargs)
         self.pack_propagate(False)
-
-
-class BarrasLaterales(BarraLateralBase):
-    def __init__(self, master, caja_imagen: CajaDeImagen, **kwargs):
-        super().__init__(master, **kwargs)
-    
-    
 
 
 class BarraLateralArchivos(tk.Frame):
@@ -123,16 +116,6 @@ class BarraLateralImagenes(BarraLateralBase):
         
         menu = tk.OptionMenu(self, variable_seleccionada, *opciones, command=self.accion)
         menu.pack(padx=10, pady=10)
-
-        tk.Button(self, text="Histograma de Luminancia",
-                  command= self.pdefdf
-        ).pack(pady=8)
-
-    def pdefdf(self):
-        self.caja.forget()
-        PanelDeEdicionFiltrosDeFunciones(self.main_area, self.caja).pack(expand=True, fill="both")
-        return
-
 
     def accion(self, seleccion):
         if self.bandera_primera_modificacion:

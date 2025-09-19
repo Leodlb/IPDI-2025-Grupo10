@@ -7,9 +7,17 @@ import numpy as np
 from Herramientas.Helper_img import *
 from Componentes.CajaImagen  import CajaDeImagen
 from Componentes.BarraDeActividad import BarraDeActividades
-from Componentes.BarrasLaterales import BarraLateralArchivos, BarraLateralConfiguracion,BarraLateralGuardado,BarraLateralImagenes
+from Componentes.BarrasLaterales import *
+
 
 class VentanaPrincipal(tk.Tk):
+    """
+    En esta clase esta lo que seria conceptualmente la Ventana.
+    Para quedar claro esta clase espera que se construyan tres cosas:
+        * Barra de actividad 
+        * Barras Laterales 
+        * Area de trabajo (main_area)
+    """
     def __init__(self):
         super().__init__()
         self.title("Editor de imágenes")
@@ -32,9 +40,5 @@ class VentanaPrincipal(tk.Tk):
         self.caja_imagen.pack(fill="both", expand=True)
 
 
-    def mostrar_sidebar(self, widget):
-        """Oculta cualquier sidebar actual y muestra el widget dado."""
-        for child in self.sidebar_container.winfo_children():
-            child.pack_forget()
-        widget.pack(fill="y", expand=True)
+    
 

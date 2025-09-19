@@ -10,11 +10,11 @@ from Componentes.CajaImagen import *
 class PanelDeEdicionArimeticaDePixeles(tk.Frame):
     
 
-    def __init__(self, master, panelDeEdicionSimple, **kwargs):
+    def __init__(self, master, panelDeEdicionSimple: CajaDeImagen, **kwargs):
         super().__init__(master, **kwargs)
         self.panelSimple = panelDeEdicionSimple
         # Imágenes
-        self.imgA = None
+        self.imgA = panelDeEdicionSimple.imagen
         self.imgB = None
         self.resultado = None
         # --- Selector de modo de combinación ---
@@ -57,7 +57,7 @@ class PanelDeEdicionArimeticaDePixeles(tk.Frame):
         self.labelR = tk.Label(self, bg="lightgray", text="Resultado", width=40, height=15)
         self.labelR.grid(row=2, column=2, sticky="nsew", padx=5, pady=5)
 
-
+        self._render_label(self.labelA, self.imgA)
         # Botones (fila separada para evitar solapamientos)
         tk.Button(self, text="Cargar Imagen A", command=self.cargar_imgA).grid(row=3, column=0, pady=5)
         tk.Button(self, text="Cargar Imagen B", command=self.cargar_imgB).grid(row=3, column=1, pady=5)

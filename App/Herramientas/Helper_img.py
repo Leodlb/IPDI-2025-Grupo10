@@ -5,7 +5,7 @@ from PIL import Image, ImageTk
 from tkinter import filedialog
 import numpy as np
 import matplotlib.pyplot as plt
-
+import math
 def linea_cromatica_X(matriz_imagen, x):
     pass
 
@@ -141,3 +141,75 @@ def if_darker(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
 
 def if_lighter(imgA: np.ndarray, imgB: np.ndarray) -> np.ndarray:
     return np.maximum(imgA, imgB).astype(np.uint8)
+
+
+def fx_str_array(funcion: str, im: np.ndarray):
+    """
+    Esta funcion es bastante especial.
+    Toma un string y lo evalua como si fuera
+    una linea de comando.
+
+    Sirve para TODAS las operaciones matematicas.
+    Se podria hacer un compilador para la funcion
+    matematica del string. Pero no lo vi necesario
+
+    Python tiene una sintaxis demasiado clara para 
+    que eso sea necesario
+    """
+    out = im.copy()
+    out = rgb_to_yiq(out)
+    out[..., 0] = np.vectorize(lambda x: eval(funcion))(out[..., 0]).astype(out.dtype)
+    return yiq_to_rgb(out)
+
+"""
+A = np.array([[1, 2],
+              [3, 4]])
+
+import matplotlib.pyplot as plt
+
+plt.hist(A.ravel(), bins=5, edgecolor='black')
+plt.xlabel('Valor')
+plt.ylabel('Frecuencia')
+plt.title('Histograma de A')
+plt.show()"""
+
+"""
+import tkinter as tk
+from tkinter import ttk
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+def mostrar_histograma(im, frame):
+    # Datos: matriz 3x4 con valores aleatorios
+    A = np.random.normal(loc=0.0, scale=1.0, size=(3,4))
+
+    # Crear figura de matplotlib
+    fig, ax = plt.subplots(figsize=(4,3))
+    ax.hist(A.ravel(), bins=10, edgecolor='black')
+    ax.set_title("Histograma de A")
+    ax.set_xlabel("Valor")
+    ax.set_ylabel("Frecuencia")
+
+    # Integrar la figura en el frame de Tkinter
+    canvas = FigureCanvasTkAgg(fig, master=frame_grafico)
+    canvas.draw()
+    canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+# ---------------- Ventana principal ----------------
+root = tk.Tk()
+root.title("Histograma en Tkinter")
+
+# Botón para generar el histograma
+btn = ttk.Button(root, text="Generar histograma", command=mostrar_histograma)
+btn.pack(pady=10)
+
+# Frame donde se mostrará el gráfico
+frame_grafico = ttk.Frame(root)
+frame_grafico.pack(fill=tk.BOTH, expand=True)
+
+root.mainloop()
+
+
+
+"""
