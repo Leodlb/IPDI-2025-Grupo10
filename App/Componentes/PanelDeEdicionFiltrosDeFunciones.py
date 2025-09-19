@@ -7,6 +7,7 @@ from Componentes.PanelDeEdicionSimple import *
 from Componentes.CajaImagen import *
 import matplotlib.pyplot as plt
 
+cadenaGlobal = {"funcion": None}
 class PanelDeEdicionFiltrosDeFunciones(tk.Frame):
 
     def __init__(self, master, panelDeEdicionSimple: CajaDeImagen, **kwargs):
@@ -18,7 +19,8 @@ class PanelDeEdicionFiltrosDeFunciones(tk.Frame):
         # --- Selector de modo de combinación ---
         modos = [
         "Filtro Raiz",
-        "Filtro Cuadratico"
+        "Filtro Cuadratico",
+        "Filtro Lineal a Trozos"
         ]
         # Crear la variable una sola vez y antes de construir el OptionMenu.
         self.var_cuasi = tk.StringVar(value=modos[0])
@@ -86,6 +88,35 @@ class PanelDeEdicionFiltrosDeFunciones(tk.Frame):
             arr = fx_str_array("math.sqrt(x)" ,arrA)
         elif modo == "Filtro Cuadratico":
             arr = fx_str_array("pow(x, 2)",arrA)
+        elif modo == "Filtro Lineal a Trozos":
+            def obtener_funcion():
+                ventana = tk.Toplevel()
+                ventana.title("Ingresar números")
+                ventana.geometry("250x150")
+
+                tk.Label(ventana, text="acotacion inferior:").pack(pady=5)
+                entrada1 = tk.Entry(ventana)
+                entrada1.pack()
+
+                tk.Label(ventana, text="acotacion superior: ").pack(pady=5)
+                entrada2 = tk.Entry(ventana)
+                entrada2.pack()
+
+                def aceptar():
+                    try:
+                        a = float(entrada1.get())
+                        b = float(entrada2.get())
+                        cadenaGlobal["funcion"] = f"1/({b-a})*x-1/({b-a})*{a}"
+                        ventana.destroy()
+                    except ValueError:
+                        messagebox.showerror("Error", "Por favor ingresa números válidos.")
+
+                tk.Button(ventana, text="Aceptar", command=aceptar).pack(pady=10)
+
+                ventana.grab_set()
+                ventana.wait_window()
+            obtener_funcion()
+            arr = fx_str_array(cadenaGlobal["funcion"],arrA)
         else:
             messagebox.showwarning("Atención", "Modo no reconocido.")
             return
