@@ -60,7 +60,7 @@ class BarraLateralArchivos(tk.Frame):
             if os.path.isdir(path):
                 id_item = self.tree.insert(padre, "end", text=nombre, values=(path,), open=False)
                 self.tree.insert(id_item, "end")
-            elif nombre.lower().endswith((".png",".jpg",".jpeg")):
+            elif nombre.lower().endswith((".png", ".jpg", ".jpeg", ".bmp")):
                 self.tree.insert(padre, "end", text=nombre, values=(path,))
 
     def on_doble_click(self, event):

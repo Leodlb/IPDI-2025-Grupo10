@@ -166,7 +166,7 @@ class PanelDeEdicionFiltrosDeFunciones(tk.Frame):
         self.panelSimple.pack(fill="both", expand=True)
 
     def cargar_imgA(self):
-        ruta = filedialog.askopenfilename(filetypes=[("Imágenes", "*.png;*.jpg;*.jpeg")])
+        ruta = filedialog.askopenfilename(filetypes=[("Imágenes", "*.png;*.bpm;*.jpg;*.jpeg")])
         if ruta:
             self.imgA = Image.open(ruta).convert("RGB")
             self._render_label(self.labelA, self.imgA.copy().resize((400, 400), Image.LANCZOS))
