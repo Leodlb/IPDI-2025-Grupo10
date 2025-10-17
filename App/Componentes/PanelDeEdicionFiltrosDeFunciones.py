@@ -20,7 +20,8 @@ class PanelDeEdicionFiltrosDeFunciones(tk.Frame):
         modos = [
         "Filtro Raiz",
         "Filtro Cuadratico",
-        "Filtro Lineal a Trozos"
+        "Filtro Lineal a Trozos",
+        "Filtro Ingresar Funcion"
         ]
         # Crear la variable una sola vez y antes de construir el OptionMenu.
         self.var_cuasi = tk.StringVar(value=modos[0])
@@ -117,6 +118,33 @@ class PanelDeEdicionFiltrosDeFunciones(tk.Frame):
                 ventana.wait_window()
             obtener_funcion()
             arr = fx_str_array(cadenaGlobal["funcion"],arrA)
+
+        elif(modo == "Filtro Ingresar Funcion"):
+            def obtener_funcion2():
+                ventana = tk.Toplevel()
+                ventana.title("Ingresa Funcion.py")
+                ventana.geometry("250x150")
+
+                tk.Label(ventana, text="F(x)=").pack(pady=5)
+                entrada1 = tk.Entry(ventana)
+                entrada1.pack()
+
+
+                def aceptar():
+                    try:
+                        a = entrada1.get()
+                        cadenaGlobal["funcion"] = a
+                        ventana.destroy()
+                    except ValueError:
+                        messagebox.showerror("Error", "Por favor ingresa números válidos.")
+
+                tk.Button(ventana, text="Aceptar", command=aceptar).pack(pady=10)
+
+                ventana.grab_set()
+                ventana.wait_window()
+            obtener_funcion2()
+            arr = fx_str_array(cadenaGlobal["funcion"],arrA)
+            
         else:
             messagebox.showwarning("Atención", "Modo no reconocido.")
             return

@@ -158,7 +158,8 @@ def fx_str_array(funcion: str, im: np.ndarray):
     """
     out = im.copy()
     out = rgb_to_yiq(out)
-    out[..., 0] = np.vectorize(lambda x: eval(funcion))(out[..., 0]).astype(out.dtype)
+    f = np.vectorize(lambda x: np.clip(eval(funcion), 0, 1))
+    out[..., 0] = f(out[..., 0]).astype(out.dtype)
     return yiq_to_rgb(out)
 
 """
