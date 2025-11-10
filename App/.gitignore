@@ -1,0 +1,71 @@
+# .gitignore generado automáticamente
+# Ignorar artefactos de Python, entornos virtuales, IDEs y backups
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+
+# Virtual environments
+env/
+venv/
+ENV/
+.venv/
+venv.bak/
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# Backup files and folders
+backup/
+*.bak
+
+# PyInstaller
+*.manifest
+*.spec
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Environment variables files
+.env
+.env.*
+*.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Byte-compiled C files
+*.pyd
+
+# Ignore Python wheel/cache
+pip-wheel-metadata/
+
+# Optional: local editable installs
+*.egg
+
+# End of .gitignore

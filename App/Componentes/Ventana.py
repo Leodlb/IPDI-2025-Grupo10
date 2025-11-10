@@ -5,7 +5,7 @@ from PIL import Image, ImageTk
 from tkinter import filedialog
 import numpy as np
 from Herramientas.Helper_img import *
-from Componentes.CajaImagen  import CajaDeImagen
+from Componentes.PanelesDeEdicion.CajaImagen import CajaDeImagen
 from Componentes.BarraDeActividad import BarraDeActividades
 from Componentes.BarrasLaterales import *
 

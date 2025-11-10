@@ -3,8 +3,8 @@ from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import numpy as np
 from Herramientas.Helper_img import *
-from Componentes.PanelDeEdicionSimple import *
-from Componentes.CajaImagen import *
+from Componentes.PanelesDeEdicion.Panel_tp1_edicion_simple import *
+from Componentes.PanelesDeEdicion.CajaImagen import *
 
 class PanelDeEdicionArimeticaDePixeles(tk.Frame):
     def __init__(self, master, panelDeEdicionSimple: CajaDeImagen, **kwargs):
@@ -109,6 +109,7 @@ class PanelDeEdicionArimeticaDePixeles(tk.Frame):
     # --- Salir del panel ---
     def salir(self):
         self.destroy()
+        self.panelSimple.pack(fill="both", expand=True)
 
     def _render_label(self, label, img):
         if img is None:

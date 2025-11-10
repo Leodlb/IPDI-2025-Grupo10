@@ -4,7 +4,10 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import filedialog
 import numpy as np
-from Componentes.BarrasLaterales import *
+from Componentes.BarrasLaterales.BarraLateralArchivos import BarraLateralArchivos
+from Componentes.BarrasLaterales.BarraLateralImagenes import BarraLateralImagenes
+from Componentes.BarrasLaterales.BarraLateralConfiguracion import BarraLateralConfiguracion
+from Componentes.BarrasLaterales.BarrasLateralGuardado import BarraLateralGuardado
 
 class BarraDeActividades(tk.Frame):
     """

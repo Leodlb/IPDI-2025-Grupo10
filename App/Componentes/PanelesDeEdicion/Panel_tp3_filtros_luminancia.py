@@ -3,8 +3,8 @@ from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import numpy as np
 from Herramientas.Helper_img import * 
-from Componentes.PanelDeEdicionSimple import * 
-from Componentes.CajaImagen import *
+from Componentes.PanelesDeEdicion.Panel_tp1_edicion_simple import *
+from Componentes.PanelesDeEdicion.CajaImagen import *
 import matplotlib.pyplot as plt
 
 cadenaGlobal = {"funcion": None}
