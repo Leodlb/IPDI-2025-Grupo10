@@ -1,6 +1,9 @@
 import numpy as np
 import math as mt
 from PIL import Image
+from Herramientas.Helper_img import yiq_to_rgb, rgb_to_yiq
+
+
 
 def matriz_bartlett(npn:int):
 
@@ -82,13 +85,123 @@ def convolution(image, kernel=np.ones((1, 1))):
 
 
 
-def rgb_to_yiq(img: np.ndarray) -> np.ndarray:
-    M = np.array([
-        [0.299000,  0.587000,  0.114000],      # Y
-        [0.595716, -0.274453, -0.321263],      # I
-        [0.211456, -0.522591,  0.311135],      # Q
-    ], dtype=np.float32)
-    H, W, _ = img.shape
-    arr = img.astype(np.float32) / 255.0
-    yiq = arr.reshape(-1,3) @ M.T
-    return yiq.reshape(H, W, 3)
+
+def aplicar_kernel_grises(img_rgb: np.ndarray, kernel: np.ndarray) -> np.ndarray:
+    """
+    Aplica un kernel a la imagen pero trabajando en escala de grises,
+    para imitar el comportamiento clásico del Laplaciano.
+    """
+
+    # Asegurar float32 en rango [0,1]
+    img_float = img_rgb.astype(np.float32) / 255.0
+
+    # Convertir a escala de grises (luminancia clásica)
+    # misma fórmula que usa CV2
+    gris = (img_float[:, :, 0] +img_float[:, :, 1] +img_float[:, :, 2])/3
+
+    # Convolución en gris
+    gris_conv = convolution(gris, kernel)
+
+    """# --- Normalización estilo Laplaciano de clase ---
+    # Usualmente se usa la magnitud:
+    gris_conv = np.abs(gris_conv)
+        """
+
+    # Evitar división por cero
+    if gris_conv.max() > 0:
+        gris_conv = gris_conv / gris_conv.max()
+    # Convertir a RGB duplicando canales
+    rgb_final = np.stack([gris_conv, gris_conv, gris_conv], axis=2)
+
+    # Volver a 0–255 uint8
+    rgb_final = np.clip(rgb_final * 255.0, 0, 255).astype(np.uint8)
+
+    return rgb_final
+
+
+
+
+
+
+
+
+
+# kernels para aplicar 
+
+KERNELS_CONVOLUCION = {
+    "Convolución Bartlett 3x3" : matriz_bartlett(3),
+    "Convolución Bartlett 5x5" : matriz_bartlett(5),
+    "Convolución Bartlett 7x7" : matriz_bartlett(7),
+    "Convolución Bartlett 9x9" : matriz_bartlett(9),
+
+    "Convolución Gaussiana 3x3": matriz_gaussiana(3),
+    "Convolución Gaussiana 5x5": matriz_gaussiana(5),
+    "Convolución Gaussiana 7x7": matriz_gaussiana(7),
+    "Convolución Gaussiana 9x9": matriz_gaussiana(9),
+
+    "Convolución Laplace 4 vecinos": np.array([
+        [ 0, -1,  0],
+        [-1,  4, -1],
+        [ 0, -1,  0]
+    ], dtype=np.float32),
+
+    "Convolución Laplace 8 vecinos": np.array([
+        [-1, -1, -1],
+        [-1,  8, -1],
+        [-1, -1, -1]
+    ], dtype=np.float32),
+
+    "Convolución Laplace Filtro Mejora": np.array([
+        [ 0, -1,  0],
+        [-1,  4, -1],
+        [ 0, -1,  0]
+    ], dtype=np.float32),
+
+    "Convolución derecha": np.array([
+        [-1, 0, 1],
+        [-2, 0, 2],
+        [-1, 0, 1]
+    ], dtype=np.float32),
+
+    "Convolución izquierda": np.array([
+        [-1, 0, 1],
+        [-2, 0, 2],
+        [-1, 0, 1]
+    ], dtype=np.float32) * -1,
+
+    "Convolución arriba": np.transpose( np.array([
+        [-1, 0, 1],
+        [-2, 0, 2],
+        [-1, 0, 1]
+    ], dtype=np.float32) * -1),
+
+    "Convolución abajo": np.transpose( np.array([
+        [-1, 0, 1],
+        [-2, 0, 2],
+        [-1, 0, 1]
+    ], dtype=np.float32)),
+
+    "Convolución diagonal derecha": np.array([
+        [0,  -2, -2],
+        [2,  0,  -2],
+        [2,  2,  0]
+    ], dtype=np.float32) * -1,
+
+    "Convolución diagonal izquierda": np.array([
+        [2,  2, 0],
+        [2,  0,-2],
+        [0, -2,-2]
+    ], dtype=np.float32),
+
+    "Convolución diagonal abajo izquierda": np.array([
+        [0,  -2, -2],
+        [2,  0,  -2],
+        [2,  2,  0]
+    ], dtype=np.float32),
+
+    "Convolución diagonala abajo derecha": np.array([
+        [2,  2, 0],
+        [2,  0,-2],
+        [0, -2,-2]
+    ], dtype=np.float32) *-1,
+}

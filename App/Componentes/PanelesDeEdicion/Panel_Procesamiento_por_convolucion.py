@@ -24,9 +24,20 @@ class PanelDeEdicionConvoluciones(tk.Frame):
             "Convolución Bartlett 7x7",
             "Convolución Bartlett 9x9",
             "Convolución Gaussiana 3x3",
-            "Convolución Gaussiana 5x5",
+            "Convolución Gaussiana 5x5", 
             "Convolución Gaussiana 7x7",
-            "Convolución Gaussiana 9x9"
+            "Convolución Gaussiana 9x9",
+            "Convolución Laplace 8 vecinos",
+            "Convolución Laplace 4 vecinos",
+            "Convolución Laplace Filtro Mejora",
+            "Convolución derecha" ,
+            "Convolución izquierda",
+            "Convolución arriba",
+            "Convolución abajo",
+            "Convolución diagonal derecha",
+            "Convolución diagonal izquierda",
+            "Convolución diagonal abajo izquierda",
+            "Convolución diagonala abajo derecha"
         ]
 
         self.var_cuasi = tk.StringVar(value=modos[0])
@@ -67,37 +78,66 @@ class PanelDeEdicionConvoluciones(tk.Frame):
             messagebox.showwarning("Atención", "Debes cargar la imagen.")
             return
 
-        arrA = np.asarray(self.imgA, dtype=np.float32)
         modo = self.var_cuasi.get()
+        arrA = np.asarray(self.imgA, dtype=np.float32)
 
-        # ---- filtros matemáticos ----
-        if "Bartlett" in modo or "Gaussiana" in modo:
+        # --- NIVEL 1 ---
+        if "Bartlett" in modo:
             size = int(modo[-1])
+            kernel = matriz_bartlett(size)
 
-            arrA_float = np.asarray(self.imgA, dtype=np.float32) / 255.0
-            yiq_array = rgb_to_yiq(arrA_float)
-
-            if "Bartlett" in modo:
-                kernel = matriz_bartlett(size)
-            else:
+        else:
+            # --- NIVEL 2 ---
+            if "Gaussiana" in modo:
+                size = int(modo[-1])
                 kernel = matriz_gaussiana(size)
 
-            # Aplicar convolución sobre la luminancia (Y)
-            Y_conv = convolution(yiq_array[:, :, 0], kernel)
+            else:
+                # --- NIVEL 3: otros kernels fijos ---
+                if modo == "Convolución Laplace 4 vecinos":
+                    kernel = KERNELS_CONVOLUCION["Convolución Laplace 4 vecinos"]
 
-            # Normalizar Y para mantener contraste
-            Y_conv = Y_conv - Y_conv.min()
-            if Y_conv.max() > 0:
-                Y_conv = Y_conv / Y_conv.max()
+                elif modo == "Convolución Laplace 8 vecinos":
+                    kernel = KERNELS_CONVOLUCION["Convolución Laplace 8 vecinos"]
 
-            # Reemplazar el canal Y en YIQ y volver a RGB
-            yiq_array[:, :, 0] = Y_conv
-            rgb_result = yiq_to_rgb(yiq_array)
+                elif modo == "Convolución Laplace Filtro Mejora":
+                    kernel = KERNELS_CONVOLUCION["Convolución Laplace Filtro Mejora"]
 
-        # Convertir a imagen final (0–255)
-        arr = rgb_result.astype(np.uint8)
-        self.resultado = Image.fromarray(np.uint8(arr))
+                elif modo == "Convolución derecha":
+                    kernel = KERNELS_CONVOLUCION["Convolución derecha"]
+
+                elif modo == "Convolución izquierda":
+                    kernel = KERNELS_CONVOLUCION["Convolución izquierda"]
+
+                elif modo == "Convolución arriba":
+                    kernel = KERNELS_CONVOLUCION["Convolución arriba"]
+
+                elif modo == "Convolución abajo":
+                    kernel = KERNELS_CONVOLUCION["Convolución abajo"]
+
+                elif modo == "Convolución diagonal derecha":
+                    kernel = KERNELS_CONVOLUCION["Convolución diagonal derecha"]
+
+                elif modo == "Convolución diagonal izquierda":
+                    kernel = KERNELS_CONVOLUCION["Convolución diagonal izquierda"]
+
+                elif modo == "Convolución diagonal abajo izquierda":
+                    kernel = KERNELS_CONVOLUCION["Convolución diagonal abajo izquierda"]
+
+                elif modo == "Convolución diagonala abajo derecha":
+                    kernel = KERNELS_CONVOLUCION["Convolución diagonala abajo derecha"]
+
+                else:
+                    messagebox.showerror("Error", f"No existe kernel para '{modo}'")
+                    return
+
+        # --- aplicar el pipeline general ---
+        resultado_arr = aplicar_kernel_grises(arrA, kernel)
+
+        # mostrar
+        self.resultado = Image.fromarray(resultado_arr)
         self._render_label(self.labelR, self.resultado)
+
 
     # --- Auxiliares ---
     def _render_label(self, label, img):
