@@ -29,7 +29,10 @@ class PanelDeEdicionConvoluciones(tk.Frame):
             "Convolución Gaussiana 9x9",
             "Convolución Laplace 8 vecinos",
             "Convolución Laplace 4 vecinos",
-            "Convolución Laplace Filtro Mejora",
+            "Convolución Laplace v4 Filtro Mejora 0.2",
+            "Convolución Laplace v4 Filtro Mejora 0.4",
+            "Convolución Laplace v8 Filtro Mejora 0.2",
+            "Convolución Laplace v8 Filtro Mejora 0.4",
             "Convolución derecha" ,
             "Convolución izquierda",
             "Convolución arriba",
@@ -100,8 +103,17 @@ class PanelDeEdicionConvoluciones(tk.Frame):
                 elif modo == "Convolución Laplace 8 vecinos":
                     kernel = KERNELS_CONVOLUCION["Convolución Laplace 8 vecinos"]
 
-                elif modo == "Convolución Laplace Filtro Mejora":
-                    kernel = KERNELS_CONVOLUCION["Convolución Laplace Filtro Mejora"]
+                elif modo == "Convolución Laplace v4 Filtro Mejora 0.2":
+                    kernel = KERNELS_CONVOLUCION["Convolución Laplace v4 Filtro Mejora 0.2"]
+
+                elif modo == "Convolución Laplace v4 Filtro Mejora 0.4":
+                    kernel = KERNELS_CONVOLUCION["Convolución Laplace v4 Filtro Mejora 0.4"]
+
+                elif modo == "Convolución Laplace v8 Filtro Mejora 0.2":
+                    kernel = KERNELS_CONVOLUCION["Convolución Laplace v8 Filtro Mejora 0.2"]
+
+                elif modo == "Convolución Laplace v8 Filtro Mejora 0.4":
+                    kernel = KERNELS_CONVOLUCION["Convolución Laplace v8 Filtro Mejora 0.4"]
 
                 elif modo == "Convolución derecha":
                     kernel = KERNELS_CONVOLUCION["Convolución derecha"]

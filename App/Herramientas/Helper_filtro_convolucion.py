@@ -105,11 +105,14 @@ def aplicar_kernel_grises(img_rgb: np.ndarray, kernel: np.ndarray) -> np.ndarray
     """# --- Normalización estilo Laplaciano de clase ---
     # Usualmente se usa la magnitud:
     gris_conv = np.abs(gris_conv)
-        """
+        
 
     # Evitar división por cero
     if gris_conv.max() > 0:
         gris_conv = gris_conv / gris_conv.max()
+
+    """
+
     # Convertir a RGB duplicando canales
     rgb_final = np.stack([gris_conv, gris_conv, gris_conv], axis=2)
 
@@ -127,6 +130,11 @@ def aplicar_kernel_grises(img_rgb: np.ndarray, kernel: np.ndarray) -> np.ndarray
 
 
 # kernels para aplicar 
+_kernel_identidad= np.array([
+        [ 0, 0, 0],
+        [ 0, 1, 0],
+        [ 0, 0, 0]
+    ])
 
 KERNELS_CONVOLUCION = {
     "Convolución Bartlett 3x3" : matriz_bartlett(3),
@@ -151,11 +159,29 @@ KERNELS_CONVOLUCION = {
         [-1, -1, -1]
     ], dtype=np.float32),
 
-    "Convolución Laplace Filtro Mejora": np.array([
+    "Convolución Laplace v4 Filtro Mejora 0.2": np.array([
         [ 0, -1,  0],
         [-1,  4, -1],
         [ 0, -1,  0]
-    ], dtype=np.float32),
+    ], dtype=np.float32)*0.2 + _kernel_identidad,
+
+    "Convolución Laplace v4 Filtro Mejora 0.4": np.array([
+        [ 0, -1,  0],
+        [-1,  4, -1],
+        [ 0, -1,  0]
+    ], dtype=np.float32) * 0.4 + _kernel_identidad,
+
+    "Convolución Laplace v8 Filtro Mejora 0.2": np.array([
+        [-1, -1, -1],
+        [-1,  8, -1],
+        [-1, -1, -1]
+    ], dtype=np.float32)*0.2 + _kernel_identidad,
+
+    "Convolución Laplace v8 Filtro Mejora 0.4": np.array([
+        [-1, -1, -1],
+        [-1,  8, -1],
+        [-1, -1, -1]
+    ], dtype=np.float32) * 0.4 + _kernel_identidad,
 
     "Convolución derecha": np.array([
         [-1, 0, 1],
@@ -168,7 +194,7 @@ KERNELS_CONVOLUCION = {
         [-2, 0, 2],
         [-1, 0, 1]
     ], dtype=np.float32) * -1,
-
+    
     "Convolución arriba": np.transpose( np.array([
         [-1, 0, 1],
         [-2, 0, 2],
