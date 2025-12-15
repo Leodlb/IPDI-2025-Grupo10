@@ -1,0 +1,6 @@
+Imageio
+Numpy 
+Matplotlib
+tkinter
+pillow
+customtkinter
